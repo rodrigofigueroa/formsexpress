@@ -1,0 +1,95 @@
+<h1>Welcome Forms</h1>
+<h2>Getting Data form server</h2>
+<ul id="users">
+  <li></li>
+</ul>
+<button id="getUsr">Get Users</button>
+<h2>Common Data Form</h2>
+<form method="post" action="http://127.0.0.1:1024/api/post/common/" id="form_1" >
+  <input type="text" value="Marceline" name="userName">
+  <input type="text" value="300" name="userAge">
+  <input type="text" value="Vampire Queen" name="userGoal">
+  <button>Send Common Data</button>
+</form>
+<h2>POST data With FEtch</h2>
+
+<form id="form_2" >
+  <input type="text" value="Peter" name="userName">
+  <input type="text" value="23" name="userAge">
+  <input type="text" value="Finish University" name="userGoal">
+  <button>Send Fetch Data</button>
+</form>
+{{!-- PUT --}}
+<h2>PUT data With FEtch</h2>
+
+<form id="form_3" >
+  <input type="text" value="1" name="id">
+  <input type="text" value="Flame Princess" name="userName">
+  <input type="text" value="230" name="userAge">
+  <input type="text" value="Queen of Flame Kingdom" name="userGoal">
+  <button>Update Data</button>
+</form>
+
+<script>
+  let ul  = document.querySelector( '#users' ),
+      btn = document.querySelector( '#getUsr' ),
+      fm2 = document.querySelector( '#form_2' ),
+      fm3 = document.querySelector( '#form_3' )
+
+      btn.addEventListener( 'click', e => {
+        e.preventDefault()
+        fetch( `http://127.0.0.1:1024/api/get/allusers/`, {
+          method: 'GET'
+        })
+        .then( raw => raw.json() )
+        .then( data => {
+          ul.innerHTML = data.map( i => `
+            <li>
+              My name is ${ i.userName } My age is ${ i.userAge }
+              and my Goal is to be a ${ i.userGoal }
+              <button data-delete="${ i.id }" >X</button>
+            </li>            
+          `).join( '' )
+          document.querySelectorAll( '[data-delete]').forEach( btn => {
+            btn.addEventListener( 'click', e => {
+              e.preventDefault()
+              fetch( `http://127.0.0.1:1024/api/delete/user/${ e.target.dataset.delete }`, {
+                method: 'DELETE'
+              })
+              .then( raw => raw.json())
+              .then( data => console.log( data ))
+            })
+          })
+        })
+      })
+      fm2.addEventListener( 'submit', e => {
+        e.preventDefault()
+        const o = {}
+        new FormData( fm2 ).forEach( ( value, key ) => o[ key ] = value )
+        fetch( `http://127.0.0.1:1024/api/post/fetch/user/`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify( o )
+        })
+        .then( raw => raw.json())
+        .then( data => console.log( data ))
+        .catch( err => console.log( err ))
+      })
+      fm3.addEventListener( 'submit', e => {
+        e.preventDefault()
+        const o = {}
+        new FormData( fm3 ).forEach( ( value, key ) => o[ key ] = value )
+        fetch( `http://127.0.0.1:1024/api/put/user/${ fm3.id.value }`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify( o )
+        })
+        .then( raw => raw.json())
+        .then( data => console.log( data ))
+        .catch( err => console.log( err ))
+      })
+</script>
